@@ -1,0 +1,89 @@
+#include <Arduino.h>
+
+int highCount = 0;
+int mediumCount = 0;
+int lowCount = 0;
+
+// HIGH PRIORITY TASK
+void HighTask(void *pvParameters)
+{
+  while (1)
+  {
+    highCount++;
+
+    Serial.printf(
+      "HIGH   | Priority: 3 | Count: %d | RUNNING -> BLOCKED (500 ms)\n",
+      highCount
+    );
+
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
+// MEDIUM PRIORITY TASK
+void MediumTask(void *pvParameters)
+{
+  while (1)
+  {
+    mediumCount++;
+
+    Serial.printf(
+      "MEDIUM | Priority: 2 | Count: %d | RUNNING -> BLOCKED (1000 ms)\n",
+      mediumCount
+    );
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
+
+// LOW PRIORITY TASK
+void LowTask(void *pvParameters)
+{
+  while (1)
+  {
+    lowCount++;
+
+    Serial.printf(
+      "LOW    | Priority: 1 | Count: %d | RUNNING -> BLOCKED (1500 ms)\n",
+      lowCount
+    );
+
+    vTaskDelay(pdMS_TO_TICKS(1500));
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  delay(1000);
+
+  Serial.println("======================================");
+  Serial.println("     FREERTOS TASK PRIORITY EXPERIMENT");
+  Serial.println("======================================");
+
+  Serial.println("HIGH   | Priority: 3");
+  Serial.println("MEDIUM | Priority: 2");
+  Serial.println("LOW    | Priority: 1");
+
+  Serial.println("Three tasks created successfully.");
+  Serial.println("State: RUNNING -> BLOCKED -> READY -> RUNNING");
+  Serial.println("======================================");
+
+  // Create three tasks
+  xTaskCreatePinnedToCore(
+    HighTask, "High", 2048, NULL, 3, NULL, 1
+  );
+
+  xTaskCreatePinnedToCore(
+    MediumTask, "Medium", 2048, NULL, 2, NULL, 1
+  );
+
+  xTaskCreatePinnedToCore(
+    LowTask, "Low", 2048, NULL, 1, NULL, 1
+  );
+}
+
+void loop()
+{
+  vTaskDelay(pdMS_TO_TICKS(1000));
+}
